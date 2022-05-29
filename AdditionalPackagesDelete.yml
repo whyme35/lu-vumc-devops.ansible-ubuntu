@@ -1,11 +1,22 @@
 ---
-- name: Playbook to Delete Packages
+- name: Playbook to Delete Php
   hosts:
     - webservers
   tasks:
-  - name: Install php and mariadb
+  - name: Delete Php
     package:
       name:
         - php
+      state: absent
+  become: yes
+
+- name: Playbook to Delete MariaDB
+  hosts:
+    - database
+  tasks:
+  - name: Delete MariaDB
+    package:
+      name:
         - mariadb-server
       state: absent
+  become: yes

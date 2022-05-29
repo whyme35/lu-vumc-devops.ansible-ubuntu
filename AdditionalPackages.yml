@@ -1,11 +1,22 @@
 ---
-- name: Playbook to Install Packages
+- name: Playbook to Install Php
   hosts:
     - webservers
   tasks:
-  - name: Install php and mariadb
+  - name: Install Php
     package:
       name:
         - php
+      state: present
+  become: yes
+
+- name: Playbook to Install MariaDB
+  hosts:
+    - database
+  tasks:
+  - name: Install MariaDB
+    package:
+      name:
         - mariadb-server
       state: present
+  become: yes
