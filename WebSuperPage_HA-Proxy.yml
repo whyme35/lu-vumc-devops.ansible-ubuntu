@@ -1,0 +1,52 @@
+---
+- name: Setup apache servers
+  hosts: servers
+  become: yes
+  tasks: 
+    - name: Install Apache
+      package:
+        name: apache2
+        state: latest
+    - name: Delete index.html if it exists
+      file:
+        path: /var/www/html/index.html
+        state: absent     
+    - name: git checkout the website
+      git:
+        dest: /var/www/html
+        repo: https://github.com/lu-vumc-devops/lu-vumc-devops.superwebpage.git
+        force: yes
+    - name: Start theApache service
+      service:
+         name: apache2
+         state: started 
+    - name: Open the ssh firewall ports
+      ufw:
+        rule: allow
+        name: OpenSSH
+        src: '{{ item }}'
+      with_items:
+         - 192.168.0.0/16
+         - 89.254.128.0/18
+    - name: Open the http firewall ports
+      ufw:
+        rule: allow
+        port: 80
+        state: enabled
+        src: '{{ item }}'
+      with_items:
+         - 192.168.0.0/16
+
+- name: Setup HaProxy
+  hosts: localhost
+  become: yes
+  tasks:
+  - name: "Configure Load balancer"
+    package:
+        name: haproxy
+  - template:
+        dest: "/etc/haproxy/haproxy.cfg"
+        src: "~/ansible-codes/lu-vumc-devops.ansible-ubuntu/assets/haproxy/haproxy.cfg"
+  - service:
+        name: "haproxy"
+        state: restarted
